@@ -123,7 +123,7 @@ def extract_and_save_db_user(path):
 			username = []
 			ip = dir#get_ip_db_default_name(dir)
 			for file in os.listdir(os.path.join(path,dcdrdir,dir)):
-				print("-------- File -> "file)
+				print("-------- File -> "+file)
 				db_user_block = fetch_ORA_U11g_05_block(os.path.join(path,dcdrdir,dir,file))
 				username.append('')
 				username.append(file)
@@ -134,4 +134,22 @@ def extract_and_save_db_user(path):
 				sheet.cell(row=users_index,column=current_ip).value = username[users_index]
 			current_ip += 1	
 		wb.save("DB.xlsx")	
-extract_and_save_db_user(pathname)				
+#extract_and_save_db_user(pathname)
+
+def processData(path):
+	# get dir
+	# change CWD
+	# create output folder
+	# go to each folder create folder new folder in output
+	# place DB and OS file into it
+	# search for DC/DR folder 
+	# execute script on it
+	os.chdir(path)
+	os.chdir('..')
+	os.mkdir('output')
+	for folderName in os.listdir(path):
+		#print(folderName)
+		os.mkdir(os.path.join("output",folderName))
+		
+	
+processData(pathname)	
