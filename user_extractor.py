@@ -72,8 +72,13 @@ def get_ip_os_default_name(name):
 	''',re.X)
 	ip_with_hostname = ip_with_hostname_finder.search(name)
 	#print(ip_with_hostname.groups())
-	hostname = ip_with_hostname.group(1)
-	ip = ip_with_hostname.group(3)
+	ip = ''
+	try:
+		hostname = ip_with_hostname.group(1)
+		ip = ip_with_hostname.group(3)
+	except:
+		ip = name
+		print("Name is unrecognized So take ip as ",ip)
 	if ip is None:
 		ip = name
 	return ip;
@@ -99,7 +104,7 @@ def extract_and_save_os_user(path):
 		# for both DC/DR
 		for file in os.listdir(os.path.join(path,dir)):
 			print('------file -> ',file)
-			ip = get_ip_or_default_name(file)
+			ip = get_ip_os_default_name(file)
 			aix_06_block = fetch_AIX_06_block(os.path.join(path,dir,file))
 			usernames = fetch_os_users(aix_06_block)
 			sheet.cell(row=1,column=current_ip).fill = fill
@@ -122,17 +127,18 @@ def extract_and_save_db_user(path):
 			print('------Dir -> ',dir)
 			username = []
 			ip = dir#get_ip_db_default_name(dir)
-			for file in os.listdir(os.path.join(path,dcdrdir,dir)):
-				print("-------- File -> "+file)
-				db_user_block = fetch_ORA_U11g_05_block(os.path.join(path,dcdrdir,dir,file))
-				username.append('')
-				username.append(file)
-				username.extend(fetch_db_user(db_user_block))
-			sheet.cell(row=1,column=current_ip).value = ip
-			sheet.cell(row=1,column=current_ip).fill = fill
-			for users_index in range(2,len(username)):
-				sheet.cell(row=users_index,column=current_ip).value = username[users_index]
-			current_ip += 1	
+			if os.path.isdir(os.path.join(path,dcdrdir,dir)):
+				for file in os.listdir(os.path.join(path,dcdrdir,dir)):
+					print("-------- File -> "+file)
+					db_user_block = fetch_ORA_U11g_05_block(os.path.join(path,dcdrdir,dir,file))
+					username.append('')
+					username.append(file)
+					username.extend(fetch_db_user(db_user_block))
+				sheet.cell(row=1,column=current_ip).value = ip
+				sheet.cell(row=1,column=current_ip).fill = fill
+				for users_index in range(2,len(username)):
+					sheet.cell(row=users_index,column=current_ip).value = username[users_index]
+				current_ip += 1	
 		wb.save("DB.xlsx")	
 #extract_and_save_db_user(pathname)
 
@@ -147,9 +153,20 @@ def processData(path):
 	os.chdir(path)
 	os.chdir('..')
 	os.mkdir('output')
+	output_folder = os.path.join(os.getcwd(),"output")
+	curr_process_folder = ''
 	for folderName in os.listdir(path):
-		#print(folderName)
-		os.mkdir(os.path.join("output",folderName))
-		
-	
+		print("=========================== Processing "+folderName+" ===========================")
+		os.chdir(output_folder)
+		os.mkdir(folderName)
+		curr_process_folder = os.path.join(output_folder,folderName)
+		# change current working directory
+		os.chdir(curr_process_folder)
+		for scriptDir in os.listdir(os.path.join(path,folderName)):
+			if re.search('os',scriptDir,re.I):
+				print('Processing OS script')
+				extract_and_save_os_user(os.path.join(path,folderName,scriptDir,"OS Script Output"))
+			elif re.search('db',scriptDir,re.I):
+				print('Processing DB script')
+				extract_and_save_db_user(os.path.join(path,folderName,scriptDir,"DB Script Output"))
 processData(pathname)	
