@@ -12,7 +12,7 @@ if len(sys.argv) > 1 :
 print(pathname)
 filepath = pathname
 
-wb = openpyxl.load_workbook("OS.xlsx")
+wb = openpyxl.load_workbook("services.xlsx")
 sheet = wb.get_active_sheet()
 current_ip = 1
 
@@ -40,20 +40,29 @@ for filename in os.listdir(filepath):
 		ip = hostname
 	script_file = open(os.path.join(filepath,filename),'r')
 	script = script_file.read() 
-	aix_06_finder = re.compile('''
-			AIX\_06((\s(.*))*?)\s\-+
+	aix_section_finder = re.compile('''
+			AIX\_26((\s(.*))*?)\s\-+
 	''',re.X)
-	aix_06_in_script = aix_06_finder.search(script)
+	aix_section_in_script = aix_section_finder.search(script)
 	#username_finder
-	#print(aix_06_in_script.group(1))
-	username_finder = re.compile('''
-	(.+)\:[^*]\:.*\:.*\:.*\:.*\:.*
+	#print(aix_section_in_script.group(1))
+	service_finder = re.compile('''
+		(\W?\w*)(\s|\:).*\n
 	''',re.X)
-	usernames = username_finder.findall(aix_06_in_script.group(1))
-	#print(usernames)
+	services = service_finder.findall(aix_section_in_script.group(1))
+	#print(services)
 	# for column
 	sheet.cell(row=1,column=current_ip).value = ip
-	for users_index in range(2,len(usernames)):
-		sheet.cell(row=users_index,column=current_ip).value = usernames[users_index]
+	# logic to remove blanks
+	all_service = []
+	for index in range(0,len(services)):
+		#print("61 "+services[index][0])
+		if services[index][0] is not '' :
+			temp = (services[index][0]).replace('\n','')
+			all_service.append(temp) 
+	print(all_service)		
+	
+	for users_index in range(1,len(all_service)):
+		sheet.cell(row=(users_index+1),column=current_ip).value = all_service[users_index]
 	current_ip += 1
-wb.save("OS.xlsx")
+wb.save("services.xlsx")

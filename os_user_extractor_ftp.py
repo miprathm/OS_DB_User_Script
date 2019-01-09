@@ -41,13 +41,13 @@ for filename in os.listdir(filepath):
 	script_file = open(os.path.join(filepath,filename),'r')
 	script = script_file.read() 
 	aix_06_finder = re.compile('''
-			AIX\_06((\s(.*))*?)\s\-+
+			AIX\_02((\s(.*))*?)\s\-+
 	''',re.X)
 	aix_06_in_script = aix_06_finder.search(script)
 	#username_finder
 	#print(aix_06_in_script.group(1))
 	username_finder = re.compile('''
-	(.+)\:[^*]\:.*\:.*\:.*\:.*\:.*
+	(.*)\s*
 	''',re.X)
 	usernames = username_finder.findall(aix_06_in_script.group(1))
 	#print(usernames)

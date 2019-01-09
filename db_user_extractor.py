@@ -1,11 +1,15 @@
 """
 OS domain user extractor from OS script and write it into Excel file
 """
-import os
+import os,sys
 import re
 import openpyxl
 
-filepath = os.path.join(os.getcwd(),"DR")
+pathname = os.path.abspath(sys.argv[0])
+if len(sys.argv) > 1 :
+	pathname = os.path.abspath(sys.argv[1])
+print(pathname)
+filepath = pathname
 
 sheetName= "DB.xlsx"
 
@@ -35,7 +39,7 @@ for foldername in os.listdir(filepath):
 	#	ip = hostname
 	db_file = os.listdir(os.path.join(filepath,foldername))
 	#print(os.path.join(filepath,foldername,db_file[0]))
-	script_file = open(os.path.join(filepath,foldername,db_file[0]),'r')
+	script_file = open(os.path.join(filepath,foldername,'Oracle11g_Unix.txt'),'r')
 	script = script_file.read() 
 	#print(script)
 	# required string extraction
@@ -55,8 +59,8 @@ for foldername in os.listdir(filepath):
 	#print(usernames)
 	# for column
 	sheet.cell(row=1,column=current_ip).value = foldername
-	for users_index in range(2,len(usernames)):
-		sheet.cell(row=users_index,column=current_ip).value = usernames[users_index][0]
+	for users_index in range(1,len(usernames)):
+		sheet.cell(row=users_index+1,column=current_ip).value = usernames[users_index][0]
 	current_ip += 1
 	
 wb.save(sheetName)
