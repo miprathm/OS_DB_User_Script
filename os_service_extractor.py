@@ -16,25 +16,15 @@ wb = openpyxl.load_workbook("services.xlsx")
 sheet = wb.get_active_sheet()
 current_ip = 1
 
-while sheet.cell(row=1,column=current_ip).value is not None:
-	#print(type(sheet.cell(row=1,column=current_ip).value))
-	current_ip += 1
-
-
 #list down all the files
 for filename in os.listdir(filepath):
 	print("Processing : "+filename)
-	"""ip_with_hostname_finder = re.compile('''
-			(.*)\_audit(\_(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))?
+	ip_with_hostname_finder = re.compile('''
+			(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})
 	''',re.X)
 	ip_with_hostname = ip_with_hostname_finder.search(filename)
 	print(ip_with_hostname.groups())
-	hostname = ip_with_hostname.group(1)
-	ip = ip_with_hostname.group(3)
-	"""
-	ip = filename
-	hostname = ip
-	print("################################\n"+str(hostname)+" : "+str(ip))
+	ip = ip_with_hostname.group(1)
 	# AIX_06 finder
 	if ip is None:
 		ip = hostname
